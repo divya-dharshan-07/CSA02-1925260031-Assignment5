@@ -1,32 +1,20 @@
-# C Programming – Assignment 5
-
-**Student:** Divya Dharshan  
-**Register Number:** 1925260031  
-**Programme:** B.Tech – Artificial Intelligence and Machine Learning  
-**Institution:** SIMATS Engineering  
-**Compiler:** Record the exact GCC version using `gcc --version`.
-
-## Coverage
-Functional decomposition, pseudocode and structure charts, function prototypes and parameter passing, recursion and call-stack tracing, pointers and memory diagrams, command-line arguments, dynamic memory, text/binary files, file updates, complexity/performance experiments, and the donor growable-list design challenge.
-
-## Structure
-Part A design/pseudocode folders: A1 through A5.  
-Part B implementation/experiment folders: B1 through B4.
-
-Each folder should contain its design or C source, required input/data files, analysis, and genuine output evidence.
+# C Programming – Assignment 5 (CO5)
+**Student:** Divya Dharshan | **Register:** 1925260031  
+**Programme:** B.Tech AIML | **Institution:** SIMATS Engineering  
+**Compiler:** GCC; record the exact local version with `gcc --version`.
 
 ## Build and run
-From the relevant folder in PowerShell:
-
+For each B task:
 ```powershell
-gcc -std=c11 -Wall -Wextra -Wpedantic main.c -o main.exe
-.\\main.exe
+gcc -std=c11 -Wall -Wextra -pedantic main.c -o main.exe
+.\main.exe
 ```
+For AddressSanitizer: `gcc -std=c11 -Wall -Wextra -fsanitize=address -g main.c -o main.exe`. Run with the task's required command-line arguments where applicable.
 
-For command-line argument tasks, append the required arguments after `main.exe`. Record the exact compiler version and command used.
+## Part A – Design and pseudocode
+A1 functional decomposition and interfaces; A2 recursion; A3 pointers and CLI; A4 growable allocation; A5 text/binary persistence.
 
-## Evidence
-Do not invent timings, file sizes, recursive call counts, sanitizer output, or screenshots. Run programs locally and retain actual evidence. Record the availability and version of AddressSanitizer or Valgrind when used.
+## Part B – Implementation
+B1 instrumented recursion; B2 adversarial input handling; B3 text-vs-binary file investigation; B4 growable donor list and engineering decision.
 
-## Status
-Repository setup started. Add each design and implementation against its full task statement and any supplied starter-code/TODO block.
+Each folder contains a design/analysis or source implementation. Complete the remaining machine-specific measurements, read-time and update benchmarks, sanitizer evidence and genuine output screenshots locally. Never substitute estimated timings or fabricated evidence.
