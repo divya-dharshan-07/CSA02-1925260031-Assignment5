@@ -1,0 +1,3 @@
+# B3 – Text File vs Binary File
+
+The benchmark writes text records and binary structs for 10, 1,000, 10,000 and 100,000 donors, reports CPU write times and binary bytes, then verifies a binary round trip. Extend the harness to time text and binary reads and compare the 50,000th-record update (binary fseek versus rewriting text) as explicitly required. Record actual outputs on your computer; do not treat one run's timings as universal. Binary records are compact and directly addressable, but raw struct files are not portable across arbitrary compilers/architectures because of endianness, padding and representation. Text is easier to inspect and exchange.
