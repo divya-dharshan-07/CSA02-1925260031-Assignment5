@@ -1,59 +1,182 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <stdint.h>
 
-typedef struct { int id; char group[4]; int days_since_donation; } Donor;
-typedef struct { Donor *data; size_t size, capacity; } DonorList;
+#define INITIAL_CAPACITY 2
+#define LINE_CAP 32
 
-static int add_donor(DonorList *list,int id,const char *group,int days){
-    if(list->size==list->capacity){
-        if(list->capacity>SIZE_MAX/2)return 0;
-        size_t cap=list->capacity==0?2:list->capacity*2;
-        if(cap>SIZE_MAX/sizeof *list->data)return 0;
-        Donor *temporary=realloc(list->data,cap*sizeof *list->data);
-        if(temporary==NULL)return 0;
-        list->data=temporary;list->capacity=cap;
-    }
-    list->data[list->size].id=id;
-    strncpy(list->data[list->size].group,group,3);
-    list->data[list->size].group[3]='\0';
-    list->data[list->size].days_since_donation=days;
-    ++list->size;return 1;
-}
-static int load_donors(const char *path,DonorList *list){
-    FILE *f=fopen(path,"r");if(!f){perror(path);return 0;}
-    int id,days;char group[4];
-    while(fscanf(f,"%d %3s %d",&id,group,&days)==3)
-        if(!add_donor(list,id,group,days)){fclose(f);return 0;}
-    int ok=feof(f);fclose(f);return ok;
-}
-int main(void){
-    DonorList list={NULL,0,0};
-    const char *groups[]={"O+","A+","B-","AB+","O-"};
-    for(int i=0;i<5;i++){
-        if(!add_donor(&list,7001+i,groups[i],120+i*10)){
-            perror("realloc");free(list.data);return 1;
+typedef struct {
+    int id;
+    char name[30];
+    char blood_group[5];
+    int age;
+} Donor;
+
+typedef struct {
+    Donor *data;
+    size_t size;
+    size_t capacity;
+} DonorList;
+
+static int add_donor(DonorList *list, Donor donor)
+{
+    if (list->size == list->capacity) {
+        size_t new_capacity = list->capacity * 2;
+
+        if (new_capacity < list->capacity ||
+            new_capacity > SIZE_MAX / sizeof(Donor)) {
+            return 0;
         }
-        printf("added %d (%s): size = %zu, capacity = %zu\n",
-               list.data[i].id,list.data[i].group,list.size,list.capacity);
-    }
-    printf("allocated bytes=%zu\n",list.capacity*sizeof *list.data);
-    free(list.data);list=(DonorList){NULL,0,0};
 
-    if(!load_donors("donors_input.txt",&list)){
-        puts("Could not load donor input file.");free(list.data);return 1;
+        Donor *temporary = realloc(list->data,
+                                   new_capacity * sizeof(Donor));
+        if (temporary == NULL) {
+            return 0;
+        }
+
+        list->data = temporary;
+        list->capacity = new_capacity;
     }
-    clock_t start=clock();size_t eligible=0;
-    puts("Nightly eligibility report (minimum 90 days):");
-    for(size_t i=0;i<list.size;i++)if(list.data[i].days_since_donation>=90){
-        ++eligible;printf("donor %d (%s): eligible\n",list.data[i].id,list.data[i].group);
+
+    list->data[list->size++] = donor;
+
+    printf("added %d (%s): size = %zu, capacity = %zu\n",
+           donor.id, donor.blood_group, list->size, list->capacity);
+    return 1;
+}
+
+static int create_input_file(void)
+{
+    FILE *fp = fopen("donors_input.txt", "w");
+    if (fp == NULL) {
+        perror("donors_input.txt");
+        return 0;
     }
-    clock_t end=clock();
-    printf("loaded=%zu eligible=%zu memory=%zu bytes report_cpu=%.6fs\n",
-           list.size,eligible,list.capacity*sizeof *list.data,
-           (double)(end-start)/CLOCKS_PER_SEC);
-    free(list.data);list.data=NULL;list.size=list.capacity=0;
+
+    if (fprintf(fp, "7001 Divya O+ 20\n"
+                    "7002 Arun A+ 25\n"
+                    "7003 Kiran B- 30\n"
+                    "7004 Ravi AB+ 22\n"
+                    "7005 Priya O- 28\n") < 0) {
+        perror("write donors_input.txt");
+        fclose(fp);
+        return 0;
+    }
+
+    if (fclose(fp) != 0) {
+        perror("close donors_input.txt");
+        return 0;
+    }
+    return 1;
+}
+
+static int load_donors(DonorList *list)
+{
+    FILE *fp = fopen("donors_input.txt", "r");
+    if (fp == NULL) {
+        perror("donors_input.txt");
+        return 0;
+    }
+
+    Donor donor;
+    int result;
+
+    while ((result = fscanf(fp, "%d %29s %4s %d",
+                            &donor.id, donor.name,
+                            donor.blood_group, &donor.age)) == 4) {
+        if (!add_donor(list, donor)) {
+            fprintf(stderr, "Unable to grow donor list.\n");
+            fclose(fp);
+            return 0;
+        }
+    }
+
+    if (!feof(fp)) {
+        fprintf(stderr, "Invalid donor record in donors_input.txt.\n");
+        fclose(fp);
+        return 0;
+    }
+
+    if (fclose(fp) != 0) {
+        perror("close donors_input.txt");
+        return 0;
+    }
+    return 1;
+}
+
+static int generate_report(const DonorList *list)
+{
+    FILE *fp = fopen("eligibility_report.txt", "w");
+    if (fp == NULL) {
+        perror("eligibility_report.txt");
+        return 0;
+    }
+
+    puts("\nNightly donor eligibility report:");
+    fprintf(fp, "Nightly donor eligibility report:\n");
+
+    for (size_t i = 0; i < list->size; ++i) {
+        const Donor *donor = &list->data[i];
+        const char *status =
+            (donor->age >= 18 && donor->age <= 65)
+                ? "Eligible" : "Not eligible";
+
+        printf("%d %s %s: %s\n",
+               donor->id, donor->name, donor->blood_group, status);
+        fprintf(fp, "%d %s %s: %s\n",
+                donor->id, donor->name, donor->blood_group, status);
+    }
+
+    if (fclose(fp) != 0) {
+        perror("close eligibility_report.txt");
+        return 0;
+    }
+    return 1;
+}
+
+int main(void)
+{
+    DonorList list = {NULL, 0, INITIAL_CAPACITY};
+    list.data = malloc(list.capacity * sizeof(Donor));
+
+    if (list.data == NULL) {
+        perror("malloc");
+        return 1;
+    }
+
+    const Donor samples[] = {
+        {7001, "Divya", "O+", 20},
+        {7002, "Arun", "A+", 25},
+        {7003, "Kiran", "B-", 30},
+        {7004, "Ravi", "AB+", 22},
+        {7005, "Priya", "O-", 28}
+    };
+    const size_t sample_count = sizeof(samples) / sizeof(samples[0]);
+
+    for (size_t i = 0; i < sample_count; ++i) {
+        if (!add_donor(&list, samples[i])) {
+            fprintf(stderr, "Unable to add sample donor.\n");
+            free(list.data);
+            return 1;
+        }
+    }
+
+    printf("allocated bytes=%zu\n", list.capacity * sizeof(Donor));
+
+    /* Reuse the list for records loaded from the persistent input file. */
+    list.size = 0;
+
+    if (!create_input_file() || !load_donors(&list) ||
+        !generate_report(&list)) {
+        fprintf(stderr, "B4 file/report operation failed.\n");
+        free(list.data);
+        return 1;
+    }
+
+    free(list.data);
+    list.data = NULL;
+    list.size = 0;
+    list.capacity = 0;
     return 0;
 }
