@@ -25,7 +25,7 @@ power(base, n):
 Call trace for power(2,5): power(2,5) → power(2,2) → power(2,1) → power(2,0). Unwind: 1 → 2 → 4 → 32. Only one recursive call is made at each level.
 
 ## Call-count recurrences
-Linear recursion: C(0)=1; C(n)=C(n−1)+1, so C(n)=n+1 and time/stack are O(n). Halving recursion: C(0)=1; C(n)=C(floor(n/2))+1, so calls and stack depth are O(log n). The recursive digital-root routine repeatedly reduces the number of digits; digit summation costs O(number of digits) per level.
+Linear recursion: C(0)=1; C(n)=C(n−1)+1, so C(n)=n+1 and time/stack are O(n). Halving recursion: C(0)=1; C(n)=C(floor(n/2))+1, so calls and stack depth are O(log n); for n>=1 the exact call count is floor(log2 n)+2 when the base case is exponent zero. The recursive digital-root routine repeatedly reduces the number of digits; digit summation costs O(number of digits) per level.
 
 ## Risks and alternatives
 A missing base case or an input that does not approach it causes unbounded recursion and stack overflow. Very large n can also exhaust stack in linear recursion. Iterative repeated multiplication is O(n) time/O(1) space; iterative square-and-multiply is O(log n) time/O(1) space. Formula-based digital root is O(1), but the recursive version is useful for demonstrating decomposition. C signed integer overflow is undefined, so power tests must stay within the chosen integer type's range.
