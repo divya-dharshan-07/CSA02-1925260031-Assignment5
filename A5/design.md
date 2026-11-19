@@ -1,5 +1,20 @@
-# A5 – File Storage Design
+# A5 – Text and Binary Persistence
 
-Donor records are human-readable text, one record per line using fprintf; validate delimiters/field lengths when parsing. Stock records are fixed-size structs suitable for fwrite/fread. Binary storage is compact and supports direct record addressing but is less portable across different endianness, padding and type representations.
+## Format choice
+Store donor details as text, one donor per line, using `fprintf`. Text is readable and easier to inspect, exchange and debug; parsing must validate field count, delimiters and buffer lengths. Store stock as fixed-size records using `fwrite`/ `fread`; fixed record size permits direct positioning. Raw C structs are not universally portable because padding, endianness and integer representation can differ.
 
-For stock record index i: fseek(fp, (long)(i*sizeof(Stock)), SEEK_SET); fread one Stock; change units; fseek back by -(long)sizeof(Stock) from current position; fwrite one Stock. Check every return value. Fixed-size binary records permit O(1) direct update; rewriting a text file requires scanning/reformatting O(n) records. Binary file size is approximately n*sizeof(Stock); text size depends on digits and separators.
+## In-place binary update pseudocode
+```text
+open stock file in "r+b"
+if open fails: report error and stop
+offset = record_index * sizeof(Stock)
+if fseek(file, offset, SEEK_SET) fails: report error
+if fread(&record, sizeof record, 1, file) != 1: report invalid index/read error
+record.units = new_units
+if fseek(file, -(long)sizeof(Stock), SEEK_CUR) fails: report error
+if fwrite(&record, sizeof record, 1, file) != 1: report write error
+close file and check close status
+```
+The index must be within the number of records; check multiplication and conversion to long before fseek. Check every I/O return value.
+
+Binary update is O(1) record access for fixed-size records and changes only the selected record. Updating a text record generally requires reading and rewriting the file (often through a temporary file), O(n) work. Binary files are compact and fast for same-program access; text files are more portable and human-readable. Binary size is approximately count × sizeof(Stock); text size varies with digits, labels and separators.
