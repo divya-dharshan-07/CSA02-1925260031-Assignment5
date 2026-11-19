@@ -1,0 +1,3 @@
+# B1 – Recursive Functions and Instrumentation
+
+The completed TODO uses one recursive call for the half exponent, then squares the result and multiplies by base for odd exponents. Expected supplied sample: linear 2^30 = 1073741824 in 31 calls; halving = same value in 6 calls. For exponent n, linear calls n+1; halving calls floor(log2 n)+1. The executable uses base 1 for large call-count tests to avoid signed integer overflow while measuring calls. Do not use its call-count data as a stack-overflow threshold; find that threshold separately on the actual machine, and record the observed result. Iterative square-and-multiply is O(log n) time/O(1) space.
