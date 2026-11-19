@@ -19,7 +19,7 @@ typedef struct {
     size_t capacity;
 } DonorList;
 
-static int add_donor(DonorList *list, Donor donor)
+static int add_donor(DonorList *list, Donor donor, int announce)
 {
     if (list->size == list->capacity) {
         size_t new_capacity = list->capacity * 2;
@@ -85,7 +85,7 @@ static int load_donors(DonorList *list)
     while ((result = fscanf(fp, "%d %29s %4s %d",
                             &donor.id, donor.name,
                             donor.blood_group, &donor.age)) == 4) {
-        if (!add_donor(list, donor)) {
+        if (!add_donor(list, donor, 0)) {
             fprintf(stderr, "Unable to grow donor list.\n");
             fclose(fp);
             return 0;
@@ -155,7 +155,7 @@ int main(void)
     const size_t sample_count = sizeof(samples) / sizeof(samples[0]);
 
     for (size_t i = 0; i < sample_count; ++i) {
-        if (!add_donor(&list, samples[i])) {
+        if (!add_donor(&list, samples[i], 1)) {
             fprintf(stderr, "Unable to add sample donor.\n");
             free(list.data);
             return 1;
