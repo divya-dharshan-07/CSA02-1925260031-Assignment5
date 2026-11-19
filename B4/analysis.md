@@ -1,0 +1,3 @@
+# B4 – Final Engineering Decision
+
+The growable donor array doubles capacity and stores realloc's result in a temporary pointer so allocation failure does not lose the original block. It frees the allocation before exit. For the 25-hospital/100× scale-up, keeping all donor records in memory gives O(1) in-memory lookup after loading and O(n) memory; batch processing lowers memory to O(batch size) but may require repeated scans; a sorted donor-ID index file supports O(log n) indexed file reads with O(1) resident index memory. Choose based on measured RAM, report latency, update frequency and access patterns. Run with AddressSanitizer or Valgrind and attach the genuine output.
