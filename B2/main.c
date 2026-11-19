@@ -27,7 +27,7 @@ int main(int argc,char **argv){
     if(fgets(line,sizeof line,stdin)!=NULL){
         size_t length=strcspn(line,"\n");
         int complete=(line[length]=='\n');
-        line[length]='\\0';
+        line[length]='\0';
         printf("fgets read: %s\n",line);
         if(!complete&&!feof(stdin)){
             while((ch=getchar())!='\n'&&ch!=EOF){}
