@@ -1,3 +1,9 @@
-# B2 – Adversarial Inputs
+# B2 – Adversarial Input and Error Handling
 
-Run with no argument, too many arguments, and an overlong donor name; the program rejects invalid command lines and bounds-checks the copied name. fgets limits the destination buffer, but callers must detect and handle truncation (and optionally drain the remainder). The missing-file test uses perror and continues safely. To compare with scanf("%s"), use a separate deliberately unsafe demonstration only in a disposable test; an overlong token can overflow a fixed buffer and invoke undefined behaviour. Build with `gcc -std=c11 -Wall -Wextra -fsanitize=address -g main.c -o main.exe`. getline reads L characters in O(L) time and uses O(L) heap space; caller frees its allocated buffer.
+Run the program with no argument, extra arguments, a normal name, and an overlong name. It checks argc before accessing argv and rejects a name that cannot fit the destination array. The missing-file case calls perror so the operating system reports the cause.
+
+The source uses fgets for a bounded line read. Compare it with scanf("%15s", buffer): a field width prevents overflow but scanf stops at whitespace and reads only one token; fgets accepts spaces and reads at most buffer-size minus one characters, so the program checks whether the newline arrived and drains any excess input. Never demonstrate unbounded scanf("%s") against an overlong input in a normal run because that can corrupt memory and has undefined behaviour.
+
+Compile with AddressSanitizer where supported:
+`gcc -std=c11 -Wall -Wextra -fsanitize=address -g main.c -o main.exe`.
+A clean sanitizer run is evidence that the tested paths showed no detected memory error, not a proof that every input is safe. getline (POSIX, not ISO C) can grow its buffer for arbitrarily long lines; its caller must free the allocated buffer.
