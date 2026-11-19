@@ -24,7 +24,8 @@ static long long power_iterative(long long base,unsigned exponent){
     return result;
 }
 static unsigned digital_root(unsigned n){
-    if(n<10U)return n;unsigned sum=0;
+    if(n<10U) return n;
+    unsigned sum=0;
     while(n){sum+=n%10U;n/=10U;}return digital_root(sum);
 }
 int main(void){
