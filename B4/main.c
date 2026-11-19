@@ -9,6 +9,7 @@ typedef struct { Donor *data; size_t size, capacity; } DonorList;
 
 static int add_donor(DonorList *list,int id,const char *group,int days){
     if(list->size==list->capacity){
+        if(list->capacity>SIZE_MAX/2)return 0;
         size_t cap=list->capacity==0?2:list->capacity*2;
         if(cap>SIZE_MAX/sizeof *list->data)return 0;
         Donor *temporary=realloc(list->data,cap*sizeof *list->data);
