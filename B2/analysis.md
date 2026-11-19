@@ -1,0 +1,3 @@
+# B2 – Adversarial Inputs
+
+Run with no argument, too many arguments, and an overlong donor name; the program rejects invalid command lines and bounds-checks the copied name. fgets limits the destination buffer, but callers must detect and handle truncation (and optionally drain the remainder). The missing-file test uses perror and continues safely. To compare with scanf("%s"), use a separate deliberately unsafe demonstration only in a disposable test; an overlong token can overflow a fixed buffer and invoke undefined behaviour. Build with `gcc -std=c11 -Wall -Wextra -fsanitize=address -g main.c -o main.exe`. getline reads L characters in O(L) time and uses O(L) heap space; caller frees its allocated buffer.
