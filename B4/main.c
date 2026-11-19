@@ -17,7 +17,7 @@ static int add_donor(DonorList *list,int id,const char *group,int days){
     }
     list->data[list->size].id=id;
     strncpy(list->data[list->size].group,group,3);
-    list->data[list->size].group[3]='\\0';
+    list->data[list->size].group[3]='\0';
     list->data[list->size].days_since_donation=days;
     ++list->size;return 1;
 }
