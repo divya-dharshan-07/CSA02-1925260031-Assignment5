@@ -73,7 +73,7 @@ int main(void) {
     f=fopen("ten_donors.bin","rb");if(!f){perror("ten_donors.bin");return 1;}
     size_t got=fread(binary_back,sizeof binary_back[0],10,f);fclose(f);
     int text_ok=1,binary_ok=got==10;
-    for(int i=0;i<10;i++){if(!same_donor(&ten[i],&text_back[i]))text_ok=0;if(!same_donor(&ten[i],&binary_back[i]))binary_ok=0;}
+    for(int i=0;i<10;i++){if(!same_donor(&ten[i],&text_back[i]))text_ok=0;if(binary_ok && !same_donor(&ten[i],&binary_back[i]))binary_ok=0;}
     printf("10 donor verification: text=%s binary=%s\n",text_ok?"identical":"failed",binary_ok?"identical":"failed");
 
     /* Required valid/invalid stock update test: zero-based index 2 is record 3. */
