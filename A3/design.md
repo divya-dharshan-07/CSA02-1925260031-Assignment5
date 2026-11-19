@@ -1,21 +1,31 @@
-# A3 – Pointer Design
+# A3 – Pointer Arithmetic, Returned Pointers and CLI
 
 For `int stock[8]; int *p=stock;`:
-- `p+3`: address of stock[3].
-- `*(p+3)` and `p[3]`: value in stock[3].
-- `*p++`: value at current p, then advance p by one int (post-increment binds to p).
+- `p+3`: address of element 3 (fourth element).
+- `*(p+3)`: value at element 3.
+- `p[3]`: same value; C defines subscripting as `*(p+3)`.
+- `*p++`: read the value currently pointed to, then advance p. Post-increment binds more tightly than unary *.
 
-Memory diagram (illustrative addresses): p→stock[0] at 1000; stock[1] 1004; stock[2] 1008; stock[3] 1012. Actual addresses depend on platform.
+Illustrative memory diagram (assuming 4-byte int; addresses are examples only):
 
+| Element | Address | Expression |
+|---|---:|---|
+| stock[0] | 1000 | p |
+| stock[1] | 1004 | p+1 |
+| stock[2] | 1008 | p+2 |
+| stock[3] | 1012 | p+3 |
+
+## Pointer-returning lowest-stock function
 ```c
 int *lowest_stock(int stock[], size_t n) {
     if (n == 0) return NULL;
     int *lowest = &stock[0];
-    for (size_t i=1; i<n; ++i)
+    for (size_t i = 1; i < n; ++i)
         if (stock[i] < *lowest) lowest = &stock[i];
     return lowest;
 }
 ```
-Returning a pointer to a local automatic variable is invalid after the function returns. Returning an index is safer if the array may be reallocated; both searches are O(n) time/O(1) extra space.
+This returns a pointer into the caller-owned array, whose lifetime continues after the function returns. Never return the address of a local automatic variable: its lifetime ends on return and the pointer dangles. An index-returning version avoids pointer invalidation if a dynamic array is reallocated; both searches take O(n) time and O(1) extra space.
 
-CLI design: `bloodbank find O+`, `bloodbank issue A- 2`; validate argc, command, group and positive quantity, print usage and return nonzero for invalid input.
+## Command-line interface
+Example invocations: `bloodbank find O+` and `bloodbank issue A- 2`. Check `argc` before reading `argv`; validate command name, blood-group token and positive numeric quantity (use `strtol`, check end pointer and range). On invalid arguments print usage to stderr and return a non-zero status. Never assume argv contains an expected argument.
